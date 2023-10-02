@@ -43,7 +43,7 @@ pub(crate) fn run() {
 
         let mut command_input = String::new();
         io::stdin().read_line(&mut command_input).unwrap();
-        let command = Command::from_str(&(command_input.trim_end()));
+        let command = Command::from_str(command_input.trim_end());
 
         if let Err(()) = command {
             println!("{}", "Unsupported command...".red());

@@ -14,7 +14,7 @@ pub struct Task {
 
 impl Task {
     fn total_duration(&self) -> Duration {
-        let mut total_duration = self.end_time.unwrap_or_else(|| Instant::now()) - self.start_time;
+        let mut total_duration = self.end_time.unwrap_or_else(Instant::now) - self.start_time;
         if self.is_paused {
             total_duration -= self.pause_duration;
         }
@@ -30,7 +30,7 @@ pub fn start(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
     let task_name = task_name.trim().to_string();
     let start_time = Instant::now();
 
-    let tasks_clone = Arc::clone(&tasks);
+    let tasks_clone = Arc::clone(tasks);
     let task_name_clone = task_name.clone();
     let handle = thread::spawn(move || {
         tasks_clone.lock().unwrap().insert(task_name_clone, Task { start_time, end_time: None, pause_start_time: None, is_paused: false, pause_duration: Duration::from_secs(0) });
@@ -46,7 +46,7 @@ pub fn pause(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
     std::io::stdin().read_line(&mut task_name_input).expect("Failed to read task name");
     let task_name = task_name_input.trim().to_string();
 
-    let tasks_clone = Arc::clone(&tasks);
+    let tasks_clone = Arc::clone(tasks);
     let handle = thread::spawn(move || {
         let mut tasks = tasks_clone.lock().unwrap();
         if let Some(task) = tasks.get_mut(&task_name) {
@@ -71,13 +71,13 @@ pub fn resume(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
     let task_name = task_name_input.trim().to_string();
     let pause_end_time = Instant::now();
 
-    let tasks_clone = Arc::clone(&tasks);
+    let tasks_clone = Arc::clone(tasks);
     let handle = thread::spawn(move || {
         let mut tasks = tasks_clone.lock().unwrap();
         if let Some(task) = tasks.get_mut(&task_name) {
             if task.is_paused {
                 task.is_paused = false;
-                task.pause_duration += pause_end_time - task.pause_start_time.unwrap_or_else(|| Instant::now());
+                task.pause_duration += pause_end_time - task.pause_start_time.unwrap_or_else(Instant::now);
 
                 println!("Task '{}' resumed.", task_name_input.trim_end().green());
             }
@@ -95,7 +95,7 @@ pub fn end(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
     let task_name = task_name.trim().to_string();
     let end_time = Instant::now();
 
-    let tasks_clone = Arc::clone(&tasks);
+    let tasks_clone = Arc::clone(tasks);
     let handle = thread::spawn(move || {
         let mut tasks = tasks_clone.lock().unwrap();
         if let Some(task) = tasks.get_mut(&task_name) {
