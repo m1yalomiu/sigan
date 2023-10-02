@@ -3,6 +3,7 @@ use std::str::FromStr;
 use crate::command::task::Task;
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
+use colored::Colorize;
 
 mod task;
 
@@ -33,7 +34,7 @@ pub(crate) fn run() {
     let tasks: Arc<Mutex<HashMap<String, Task>>> = Arc::new(Mutex::new(HashMap::new()));
 
     loop {
-        println!("Please select from the following:");
+        println!("{}", "Please select from the following:".bold().green());
         println!("1: Start a timer");
         println!("2: Pause a timer");
         println!("3: Resume a timer");
@@ -45,7 +46,7 @@ pub(crate) fn run() {
         let command = Command::from_str(&(command_input.trim_end()));
 
         if let Err(()) = command {
-            println!("Unsupported command...");
+            println!("{}", "Unsupported command...".red());
         } else {
             execute(command.unwrap(), &tasks);
         };

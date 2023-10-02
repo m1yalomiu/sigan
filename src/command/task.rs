@@ -2,6 +2,7 @@ use std::thread;
 use std::time::{Instant, Duration};
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
+use colored::Colorize;
 
 pub struct Task {
     start_time: Instant,
@@ -23,7 +24,7 @@ impl Task {
 
 
 pub fn start(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
-    println!("Enter task name:");
+    println!("{}", "Enter task name:".bold().green());
     let mut task_name = String::new();
     std::io::stdin().read_line(&mut task_name).expect("Failed to read task name");
     let task_name = task_name.trim().to_string();
@@ -36,11 +37,11 @@ pub fn start(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
     });
     handle.join().unwrap();
 
-    println!("Task '{}' started.", task_name);
+    println!("Task '{}' started.", task_name.green());
 }
 
 pub fn pause(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
-    println!("Enter task name to pause:");
+    println!("{}", "Enter task name to pause:".green());
     let mut task_name_input = String::new();
     std::io::stdin().read_line(&mut task_name_input).expect("Failed to read task name");
     let task_name = task_name_input.trim().to_string();
@@ -54,17 +55,17 @@ pub fn pause(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
                 task.pause_duration = Duration::from_secs(0);
                 task.pause_start_time = Some(Instant::now());
 
-                println!("Task '{}' paused.", task_name_input.trim_end());
+                println!("Task '{}' paused.", task_name_input.trim_end().green());
             }
         } else {
-            println!("Task not found.");
+            println!("{}", "Task not found.".red());
         }
     });
     handle.join().unwrap();
 }
 
 pub fn resume(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
-    println!("Enter task name to resume:");
+    println!("{}", "Enter task name to resume:".green());
     let mut task_name_input = String::new();
     std::io::stdin().read_line(&mut task_name_input).expect("Failed to read task name");
     let task_name = task_name_input.trim().to_string();
@@ -78,17 +79,17 @@ pub fn resume(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
                 task.is_paused = false;
                 task.pause_duration += pause_end_time - task.pause_start_time.unwrap_or_else(|| Instant::now());
 
-                println!("Task '{}' resumed.", task_name_input.trim_end());
+                println!("Task '{}' resumed.", task_name_input.trim_end().green());
             }
         } else {
-            println!("Task not found.");
+            println!("{}", "Task not found.".red());
         }
     });
     handle.join().unwrap();
 }
 
 pub fn end(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
-    println!("Enter task name to end:");
+    println!("{}", "Enter task name to end:".green());
     let mut task_name = String::new();
     std::io::stdin().read_line(&mut task_name).expect("Failed to read task name");
     let task_name = task_name.trim().to_string();
@@ -100,9 +101,9 @@ pub fn end(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
         if let Some(task) = tasks.get_mut(&task_name) {
             task.end_time = Some(end_time);
             let duration = task.total_duration();
-            println!("Task '{}' ended. Duration: {:?}", task_name, duration);
+            println!("Task '{}' ended. Duration: {:?}", task_name.green(), duration);
         } else {
-            println!("Task not found.");
+            println!("{}", "Task not found.".red());
         }
     });
     handle.join().unwrap();
@@ -115,6 +116,6 @@ pub fn list_all(tasks: &Arc<Mutex<HashMap<String, Task>>>) {
     for (task_name, task) in tasks.iter() {
         let duration = task.total_duration();
         let status = if task.is_paused { "Paused" } else if task.end_time.is_none() { "Running" } else { "Ended" };
-        println!("Task Name: '{}', Status: {}, Total Duration: {:?}", task_name, status, duration);
+        println!("Task Name: '{}', Status: {}, Total Duration: {:?}", task_name.green(), status.blue(), duration);
     }
 }
